@@ -26,7 +26,7 @@ namespace beehive
 
         static async Task Main(string[] args)
         {
-            AssemblyLoadContext.Default.Unloading += SigTermEventHandler;
+            AssemblyLoadContext.Default.Unloading += Default_Unloading; ;
             Console.CancelKeyPress += CancelHandler;
 
             logger = new LoggerConfiguration()
@@ -71,14 +71,15 @@ namespace beehive
             }
         }
 
-        private static void SigTermEventHandler(AssemblyLoadContext obj)
+        private static void Default_Unloading(AssemblyLoadContext obj)
         {
-            logger.Information("Received sigterm...");
+            logger.Information("Exiting...");
             tokenSource.Cancel();
         }
 
         private static void CancelHandler(object sender, ConsoleCancelEventArgs e)
         {
+            e.Cancel = true;
             logger.Information("Cancelled...");
             tokenSource.Cancel();
         }
