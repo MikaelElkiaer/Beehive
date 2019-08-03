@@ -109,7 +109,7 @@ namespace beehive
         private static async Task Run(DockerClient client, ContainerListResponse c)
         {
             logger.Information("Running container [{ImageName}] - [{ContainerId}]", c.Image, c.ID);
-            //await client.Containers.StartContainerExecAsync(c.ID);
+            await client.Containers.StartContainerAsync(c.ID, null);
         }
     }
 }
