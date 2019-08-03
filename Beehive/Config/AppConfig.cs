@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace beehive.Config
+namespace Beehive.Config
 {
     public class AppConfig
     {

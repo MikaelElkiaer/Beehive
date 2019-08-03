@@ -1,6 +1,6 @@
 ﻿using System.Threading;
 
-namespace beehive.Config
+namespace Beehive.Config
 {
     public class ProgramContext
     {

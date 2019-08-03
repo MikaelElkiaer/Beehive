@@ -2,11 +2,11 @@
 using System.Threading.Tasks;
 using System.Runtime.Loader;
 using Serilog;
-using beehive.Config;
+using Beehive.Config;
 using Autofac;
-using beehive.Services;
+using Beehive.Services;
 
-namespace beehive
+namespace Beehive
 {
     class Program
     {

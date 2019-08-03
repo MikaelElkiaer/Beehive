@@ -1,7 +1,7 @@
 ﻿using Serilog;
 using System;
 
-namespace beehive.Config
+namespace Beehive.Config
 {
     public class SerilogConfig
     {

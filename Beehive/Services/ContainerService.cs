@@ -1,4 +1,4 @@
-﻿using beehive.Config;
+﻿using Beehive.Config;
 using Cronos;
 using Docker.DotNet;
 using Docker.DotNet.Models;
@@ -8,7 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace beehive.Services
+namespace Beehive.Services
 {
     public class ContainerService
     {

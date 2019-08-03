@@ -1,8 +1,8 @@
-﻿using beehive.Config;
+﻿using Beehive.Config;
 using System;
 using System.Threading.Tasks;
 
-namespace beehive.Services
+namespace Beehive.Services
 {
     public class WaiterService
     {

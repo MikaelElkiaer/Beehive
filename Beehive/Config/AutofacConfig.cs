@@ -1,10 +1,10 @@
 ﻿using Autofac;
-using beehive.Services;
+using Beehive.Services;
 using Docker.DotNet;
 using System;
 using System.Threading;
 
-namespace beehive.Config
+namespace Beehive.Config
 {
     public class AutofacConfig
     {
