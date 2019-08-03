@@ -13,7 +13,7 @@ namespace beehive
 {
     class Program
     {
-        const string UNIX = "unix:///var/run/docker.sock";
+        const string LINUX = "unix:///var/run/docker.sock";
         const string WINDOWS = "npipe://./pipe/docker_engine";
         private const string BEEHIVE_CRON = "beehive.cron";
         private const string BEEHIVE_ENABLE = "beehive.enable";
@@ -26,7 +26,7 @@ namespace beehive
 
         static async Task Main(string[] args)
         {
-            AssemblyLoadContext.Default.Unloading += Default_Unloading; ;
+            AssemblyLoadContext.Default.Unloading += Default_Unloading;
             Console.CancelKeyPress += CancelHandler;
 
             logger = new LoggerConfiguration()
@@ -42,7 +42,13 @@ namespace beehive
             {
                 logger.Debug("Running at [{RunTimeUtc}]", DateTime.UtcNow);
 
-                using (DockerClient client = new DockerClientConfiguration(new Uri(WINDOWS))
+                Uri dockerEndpoint;
+                if (System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.Windows))
+                    dockerEndpoint = new Uri(WINDOWS);
+                else
+                    dockerEndpoint = new Uri(LINUX);
+
+                using (DockerClient client = new DockerClientConfiguration(dockerEndpoint)
                     .CreateClient())
                 {
                     IList<ContainerListResponse> containers = await client.Containers.ListContainersAsync(new ContainersListParameters
