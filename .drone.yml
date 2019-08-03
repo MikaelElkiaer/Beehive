@@ -1,0 +1,9 @@
+kind: pipeline
+name: default
+
+steps:
+- name: dockerize
+  image: plugins/docker
+  settings:
+    repo: registry.mikelk.dk/beehive
+    tags: latest
