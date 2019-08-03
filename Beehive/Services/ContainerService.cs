@@ -60,7 +60,7 @@ namespace Beehive.Services
 
         private bool IsWithinThreshold(DateTime utcNow, DateTime? nextOccurence)
         {
-            return (utcNow - nextOccurence.Value) < appConfig.RunFrequency;
+            return (nextOccurence.Value - utcNow) < appConfig.RunFrequency;
         }
 
         private async Task Run(DockerClient client, ContainerListResponse c)
