@@ -12,7 +12,7 @@ This means that the highest frequency tasks can run with is 1 minute.
 3. Start via docker run or docker-compose
 
 ### docker run
-`docker run -v /var/run/docker.sock:/var/run/docker.sock beehive`
+`docker run -d -v /var/run/docker.sock:/var/run/docker.sock beehive`
 
 ### docker-compose
 ```yaml
