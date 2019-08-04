@@ -1,6 +1,8 @@
-﻿using Serilog;
+﻿using Beehive.Config;
+using Serilog;
 using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using System.Text;
 
 namespace Beehive.Services
@@ -8,10 +10,12 @@ namespace Beehive.Services
     public class TimeZoneService
     {
         private readonly ILogger logger;
+        private readonly ProgramContext programContext;
 
-        public TimeZoneService(ILogger logger)
+        public TimeZoneService(ILogger logger, ProgramContext programContext)
         {
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            this.programContext = programContext;
         }
 
         public TimeZoneInfo GetTimeZoneInfo(string tz)
@@ -19,7 +23,10 @@ namespace Beehive.Services
             TimeZoneInfo timeZoneInfo;
             try
             {
-                var timeZoneId = TimeZoneConverter.TZConvert.IanaToWindows(tz);
+                string timeZoneId = tz;
+                if (programContext.OperationSystem == OSPlatform.Windows)
+                    timeZoneId = TimeZoneConverter.TZConvert.IanaToWindows(tz);
+
                 timeZoneInfo = TimeZoneInfo.FindSystemTimeZoneById(timeZoneId);
             }
             catch (Exception ex)

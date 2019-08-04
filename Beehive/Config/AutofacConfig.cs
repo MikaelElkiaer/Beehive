@@ -1,16 +1,18 @@
 ﻿using Autofac;
 using Beehive.Services;
+using Beehive.Utils;
 using Docker.DotNet;
 using Serilog;
 using System;
+using System.Runtime.InteropServices;
 using System.Threading;
 
 namespace Beehive.Config
 {
     public class AutofacConfig
     {
-        const string LINUX = "unix:///var/run/docker.sock";
-        const string WINDOWS = "npipe://./pipe/docker_engine";
+        const string DOCKER_ENDPOINT_LINUX = "unix:///var/run/docker.sock";
+        const string DOCKER_ENDPOINT_WINDOWS = "npipe://./pipe/docker_engine";
         private const string TZ = "TZ";
         private const string TZ_DEFAULT = "UTC";
 
@@ -32,7 +34,10 @@ namespace Beehive.Config
 
         private static void RegisterConfig(ContainerBuilder cb)
         {
-            cb.Register(c => new ProgramContext(new CancellationTokenSource())).AsSelf().SingleInstance();
+            cb.Register(c => new ProgramContext(
+                cancellationTokenSource: new CancellationTokenSource(),
+                operationSystem: OSUtils.GetOperationSystem())
+            ).AsSelf().SingleInstance();
             cb.Register(c => new AppConfig(
                 runFrequency: TimeSpan.FromMinutes(1),
                 timeZoneInfo: c.Resolve<TimeZoneService>().GetTimeZoneInfo(Environment.GetEnvironmentVariable(TZ) ?? TZ_DEFAULT))
@@ -42,13 +47,17 @@ namespace Beehive.Config
 
         private static void RegisterServices(ContainerBuilder cb)
         {
-            Uri dockerEndpoint;
-            if (System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.Windows))
-                dockerEndpoint = new Uri(WINDOWS);
-            else
-                dockerEndpoint = new Uri(LINUX);
+            cb.Register(c =>
+            {
+                OSPlatform os = c.Resolve<ProgramContext>().OperationSystem;
+                Uri dockerEndpoint;
+                if (os == OSPlatform.Windows)
+                    dockerEndpoint = new Uri(DOCKER_ENDPOINT_WINDOWS);
+                else
+                    dockerEndpoint = new Uri(DOCKER_ENDPOINT_LINUX);
 
-            cb.Register(c => new DockerClientConfiguration(dockerEndpoint).CreateClient()).AsSelf().SingleInstance();
+                return new DockerClientConfiguration(dockerEndpoint).CreateClient();
+            }).AsSelf().SingleInstance();
             cb.RegisterType<ContainerService>().AsSelf();
             cb.RegisterType<CronService>().AsSelf();
             cb.RegisterType<TimeZoneService>().AsSelf();

@@ -1,10 +1,14 @@
-﻿using Beehive.Services;
+﻿using Beehive.Config;
+using Beehive.Services;
+using Beehive.Utils;
 using FakeItEasy;
 using FluentAssertions;
 using Serilog;
 using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
 using Xunit;
 
 namespace Beehive.Tests
@@ -21,14 +25,28 @@ namespace Beehive.Tests
         }
 
         [Theory]
-        [InlineData("Europe/Copenhagen", "Romance Standard Time")]
-        [InlineData("UTC", "UTC")]
-        public void GetTimeZoneInfo(string tz, string timeZoneId)
+        [MemberData(nameof(GetTimeZoneInfo_Theory_Data))]
+        public void GetTimeZoneInfo_Theory(string tz, TimeSpan baseUtcOffset, bool supportsDaylightSavingTime)
         {
-            var timeZoneInfo = new TimeZoneService(fakeLogger).GetTimeZoneInfo(tz);
+            var timeZoneInfo = new TimeZoneService(fakeLogger, new ProgramContext
+            (
+                new CancellationTokenSource(),
+                OSUtils.GetOperationSystem()
+            )).GetTimeZoneInfo(tz);
 
             timeZoneInfo.Should().NotBeNull();
-            timeZoneInfo.Id.Should().Be(timeZoneId);
+            timeZoneInfo.BaseUtcOffset.Should().Be(baseUtcOffset);
+            timeZoneInfo.SupportsDaylightSavingTime.Should().Be(supportsDaylightSavingTime);
+        }
+
+        public static IEnumerable<object[]> GetTimeZoneInfo_Theory_Data()
+        {
+            yield return new object[] {
+                "Europe/Copenhagen", TimeSpan.FromHours(1), true
+            };
+            yield return new object[] {
+                "UTC", TimeSpan.Zero, false
+            };
         }
     }
 }
