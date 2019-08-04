@@ -4,13 +4,13 @@ namespace Beehive.Config
 {
     public class AppConfig
     {
-        public AppConfig(TimeSpan runFrequency, DateTime runStartUtc)
+        public AppConfig(TimeSpan runFrequency, TimeZoneInfo timeZoneInfo)
         {
             RunFrequency = runFrequency;
-            RunStartUtc = runStartUtc;
+            TimeZoneInfo = timeZoneInfo;
         }
 
         public TimeSpan RunFrequency { get; }
-        public DateTime RunStartUtc { get; }
+        public TimeZoneInfo TimeZoneInfo { get; }
     }
 }

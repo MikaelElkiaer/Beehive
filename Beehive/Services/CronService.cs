@@ -1,31 +1,58 @@
 ﻿using Beehive.Config;
+using Beehive.Model;
 using Cronos;
+using Serilog;
 using System;
 
 namespace Beehive.Services
 {
     public class CronService
     {
+        private readonly ILogger logger;
         private readonly AppConfig appConfig;
+        private readonly RunConfig runConfig;
 
-        public CronService(AppConfig appConfig)
+        public CronService(ILogger logger, AppConfig appConfig, RunConfig runConfig)
         {
+            this.logger = logger;
             this.appConfig = appConfig;
+            this.runConfig = runConfig;
         }
 
         public bool ShouldRun(string cronText)
         {
-            var cronExpr = CronExpression.Parse(cronText);
-            var utcNow = appConfig.RunStartUtc;
+            DateTime? nextOccurence;
+            try
+            {
+                nextOccurence = GetNextOccurence(cronText, runConfig.StartUtc, appConfig.TimeZoneInfo);
 
-            var nextOccurence = cronExpr.GetNextOccurrence(utcNow, true);
+            }
+            catch (CronParseException ex)
+            {
+                logger.Warning(ex, "Could not parse cron expression {CronExpression}", cronText);
+                return false;
+            }
 
-            return IsWithinThreshold(utcNow, nextOccurence);
+            return IsWithinThreshold(runConfig.StartUtc, nextOccurence, appConfig.RunFrequency);
         }
 
-        public bool IsWithinThreshold(DateTime utcNow, DateTime? nextOccurence)
+        internal static DateTime? GetNextOccurence(string cronText, DateTime nowUtc, TimeZoneInfo timeZoneInfo)
         {
-            return nextOccurence.HasValue && (nextOccurence.Value - utcNow) < appConfig.RunFrequency;
+            CronExpression cronExpr;
+            try
+            {
+                cronExpr = CronExpression.Parse(cronText);
+            }
+            catch (Exception ex)
+            {
+                throw new CronParseException("Failed to parse cron expression", ex);
+            }
+            return cronExpr.GetNextOccurrence(nowUtc, timeZoneInfo, true);
+        }
+
+        internal static bool IsWithinThreshold(DateTime utcNow, DateTime? nextOccurenceUtc, TimeSpan threshold)
+        {
+            return nextOccurenceUtc.HasValue && (nextOccurenceUtc.Value - utcNow) < threshold;
         }
     }
 }

@@ -19,20 +19,22 @@ namespace Beehive.Services
 
         private readonly ILogger logger;
         private readonly AppConfig appConfig;
+        private readonly RunConfig runConfig;
         private readonly DockerClient dockerClient;
         private readonly CronService cronService;
 
-        public ContainerService(ILogger logger, AppConfig appConfig, DockerClient dockerClient, CronService cronService)
+        public ContainerService(ILogger logger, AppConfig appConfig, RunConfig runConfig, DockerClient dockerClient, CronService cronService)
         {
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
             this.appConfig = appConfig ?? throw new ArgumentNullException(nameof(appConfig));
+            this.runConfig = runConfig;
             this.dockerClient = dockerClient ?? throw new ArgumentNullException(nameof(dockerClient));
             this.cronService = cronService;
         }
 
         public async Task Run()
         {
-            logger.Debug("Running at [{RunStartUtc}]", appConfig.RunStartUtc);
+            logger.Debug("Running at [{RunStartUtc}]", runConfig.StartUtc);
 
             IList<ContainerListResponse> containers = await dockerClient.Containers.ListContainersAsync(new ContainersListParameters
             {
