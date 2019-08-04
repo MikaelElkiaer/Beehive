@@ -2,7 +2,12 @@ kind: pipeline
 name: default
 
 steps:
-- name: dockerize
+- name: test
+  image: microsoft/dotnet:sdk
+  commands:
+    - dotnet test
+
+- name: publish
   image: plugins/docker
   settings:
     repo: registry.mikelk.dk/beehive
