@@ -22,10 +22,15 @@ namespace Beehive.Config
             return cb.Build();
         }
 
+        private static void RegisterLogger(ContainerBuilder cb)
+        {
+            cb.Register(c => SerilogConfig.CreateLogger()).AsSelf();
+        }
+
         private static void RegisterConfig(ContainerBuilder cb)
         {
             cb.Register(c => new ProgramContext(new CancellationTokenSource())).AsSelf().SingleInstance();
-            cb.Register(c => new AppConfig(TimeSpan.FromMinutes(1))).AsSelf().SingleInstance();
+            cb.Register(c => new AppConfig(TimeSpan.FromMinutes(1), DateTime.UtcNow)).AsSelf().InstancePerLifetimeScope();
         }
 
         private static void RegisterServices(ContainerBuilder cb)
@@ -38,12 +43,8 @@ namespace Beehive.Config
 
             cb.Register(c => new DockerClientConfiguration(dockerEndpoint).CreateClient()).AsSelf().SingleInstance();
             cb.RegisterType<ContainerService>().AsSelf();
+            cb.RegisterType<CronService>().AsSelf();
             cb.RegisterType<WaiterService>().AsSelf();
-        }
-
-        private static void RegisterLogger(ContainerBuilder cb)
-        {
-            cb.Register(c => SerilogConfig.CreateLogger()).AsSelf();
         }
     }
 }

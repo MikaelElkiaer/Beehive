@@ -20,17 +20,19 @@ namespace Beehive.Services
         private readonly ILogger logger;
         private readonly AppConfig appConfig;
         private readonly DockerClient dockerClient;
+        private readonly CronService cronService;
 
-        public ContainerService(ILogger logger, AppConfig appConfig, DockerClient dockerClient)
+        public ContainerService(ILogger logger, AppConfig appConfig, DockerClient dockerClient, CronService cronService)
         {
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
             this.appConfig = appConfig ?? throw new ArgumentNullException(nameof(appConfig));
             this.dockerClient = dockerClient ?? throw new ArgumentNullException(nameof(dockerClient));
+            this.cronService = cronService;
         }
 
         public async Task Run()
         {
-            logger.Debug("Running at [{RunTimeUtc}]", DateTime.UtcNow);
+            logger.Debug("Running at [{RunStartUtc}]", appConfig.RunStartUtc);
 
             IList<ContainerListResponse> containers = await dockerClient.Containers.ListContainersAsync(new ContainersListParameters
             {
@@ -42,25 +44,9 @@ namespace Beehive.Services
             {
                 logger.Debug("Found {BeehiveEnabledCount} enabled containers", containers.Count());
                 foreach (var c in containers)
-                    if (ShouldRun(c))
+                    if (c.Labels.TryGetValue(BEEHIVE_CRON, out string cronText) && cronService.ShouldRun(cronText))
                         await Run(dockerClient, c);
             }
-        }
-
-        private bool ShouldRun(ContainerListResponse c)
-        {
-            c.Labels.TryGetValue(BEEHIVE_CRON, out string cronText);
-            var cronExpr = CronExpression.Parse(cronText);
-            var utcNow = DateTime.UtcNow;
-
-            var nextOccurence = cronExpr.GetNextOccurrence(utcNow, true);
-
-            return nextOccurence.HasValue && IsWithinThreshold(utcNow, nextOccurence);
-        }
-
-        private bool IsWithinThreshold(DateTime utcNow, DateTime? nextOccurence)
-        {
-            return (nextOccurence.Value - utcNow) < appConfig.RunFrequency;
         }
 
         private async Task Run(DockerClient client, ContainerListResponse c)
