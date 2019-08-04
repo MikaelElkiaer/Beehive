@@ -29,6 +29,38 @@ A task is registered by attaching 2 labels to a container:
 * `beehive.enable` - task will only be run if set to `true`
 * `beehive.cron` - defines the task schedule using [Cronos' extended cron format](https://github.com/HangfireIO/Cronos#cron-format)
 
-Use `docker create` to register a container with a configuration, but without running it:
+### docker create
+* Use `docker create` to register a container with a configuration, but without running it:
 
-`docker create -l beehive.enable=true -l "beehive.cron=*/1 * * * *" hello-world`
+`docker create -l beehive.enable=true -l "beehive.cron=*/1 * * * *" --name hello-world hello-world`
+
+* Remove and re-add to update the task schedule:
+
+`docker rm hello-world || docker create -l beehive.enable=true -l "beehive.cron=*/5 * * * *" --name hello-world hello-world`
+
+* Remove and re-add to disable the task:
+
+`docker rm hello-world || docker create -l beehive.enable=false -l "beehive.cron=*/1 * * * *" --name hello-world hello-world`
+
+### docker-compose
+```yaml
+version: '3.7'
+services:
+  beehive:
+    image: hello-world
+    labels:
+      - "beehive.enable=true"
+      - "beehive.cron=*/1 * * * *"
+```
+
+* Register the tasks via up:
+
+`docker-compose up --no-start`
+
+* Update the tasks through changing the docker-compose file and re-running
+
+`docker-compose up --no-start`
+
+* Disable all tasks via down:
+
+`docker-compose down`
