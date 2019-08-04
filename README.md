@@ -46,7 +46,7 @@ A task is registered by attaching 2 labels to a container:
 ```yaml
 version: '3.7'
 services:
-  beehive:
+  hello-world:
     image: hello-world
     labels:
       - "beehive.enable=true"
