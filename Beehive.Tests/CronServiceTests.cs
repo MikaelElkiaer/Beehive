@@ -44,7 +44,7 @@ namespace Beehive.Tests
             yield return new object[] {
                 "0 7 * * *",
                 new DateTime(2019, 8, 4, 14, 11, 0, DateTimeKind.Utc),
-                TimeZoneInfo.FindSystemTimeZoneById("Romance Standard Time"),
+                TimeZoneInfo.FindSystemTimeZoneById("Europe/Copenhagen"),
                 new DateTime(2019, 8, 5, 5, 0, 0, DateTimeKind.Utc)
             };
         }
