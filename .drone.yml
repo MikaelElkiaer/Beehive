@@ -3,12 +3,22 @@ name: default
 
 steps:
 - name: test
-  image: microsoft/dotnet:sdk
+  image: mcr.microsoft.com/dotnet/core/sdk:2.2
   commands:
     - dotnet test
 
-- name: publish
+- name: registry
   image: plugins/docker
   settings:
     repo: registry.mikelk.dk/beehive
     tags: latest
+
+- name: hub  
+  image: plugins/docker
+  settings:
+    repo: mikaelelkiaer/beehive
+    tags: latest
+    username:
+      from_secret: DOCKER_USERNAME
+    password:
+      from_secret: DOCKER_PASSWORD
