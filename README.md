@@ -35,7 +35,7 @@ A task is registered by attaching 2 labels to a container:
 ### docker create
 * Use `docker create` to register a container with a configuration, but without running it:
 
-`docker create -l beehive.enable=true -l "beehive.cron=*/1 * * * *" --name hello-world hello-world`
+`docker create -l beehive.enable=true -l "beehive.cron=*/2 * * * *" --name hello-world hello-world`
 
 * Remove and re-add to update the task schedule:
 
@@ -43,7 +43,7 @@ A task is registered by attaching 2 labels to a container:
 
 * Remove and re-add to disable the task:
 
-`docker rm hello-world || docker create -l beehive.enable=false -l "beehive.cron=*/1 * * * *" --name hello-world hello-world`
+`docker rm hello-world || docker create -l beehive.enable=false -l "beehive.cron=*/5 * * * *" --name hello-world hello-world`
 
 ### docker-compose
 ```yaml
@@ -53,7 +53,7 @@ services:
     image: hello-world
     labels:
       - "beehive.enable=true"
-      - "beehive.cron=*/1 * * * *"
+      - "beehive.cron=*/2 * * * *"
 ```
 
 * Register the tasks via up:
