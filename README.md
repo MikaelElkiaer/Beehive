@@ -8,20 +8,21 @@ This way it can watch labels for registered containers and run them as per their
 Beehive checks every minute if any containers, with the `beehive` labels, are supposed to run that minute.
 This means that the highest frequency tasks can run with is 1 minute.
 
+## Image on Docker Hub
+https://hub.docker.com/r/mikaelelkiaer/beehive
+
 ## Starting Beehive
-1. Clone the repo
-2. Build the image
-3. Start via docker run or docker-compose
+Below is described how to run Beehive using the Docker Hub image.
 
 ### docker run
-`docker run -d -v /var/run/docker.sock:/var/run/docker.sock beehive`
+`docker run -d -v /var/run/docker.sock:/var/run/docker.sock mikaelelkiaer/beehive`
 
 ### docker-compose
 ```yaml
 version: '3.7'
 services:
   beehive:
-    image: beehive
+    image: mikaelelkiaer/beehive
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
 ```
