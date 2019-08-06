@@ -12,19 +12,29 @@ namespace Beehive
     {
         static readonly ILifetimeScope container = AutofacConfig.CreateContainer();
 
-        static async Task Main(string[] args)
+        static async Task<int> Main(string[] args)
         {
             AssemblyLoadContext.Default.Unloading += Default_Unloading;
             Console.CancelKeyPress += CancelHandler;
 
-            while (!container.Resolve<ProgramContext>().CancellationTokenSource.Token.IsCancellationRequested)
+            try
             {
-                using (var container = Program.container.BeginLifetimeScope())
+                while (!container.Resolve<ProgramContext>().CancellationTokenSource.Token.IsCancellationRequested)
                 {
-                    await container.Resolve<ContainerService>().Run();
-                    await container.Resolve<WaiterService>().Wait();
+                    using (var container = Program.container.BeginLifetimeScope())
+                    {
+                        await container.Resolve<ContainerService>().Run();
+                        await container.Resolve<WaiterService>().Wait();
+                    }
                 }
             }
+            catch (Exception ex)
+            {
+                container.Resolve<ILogger>().Fatal(ex, "Service crashed...");
+                return -1;
+            }
+
+            return 0;
         }
 
         private static void Default_Unloading(AssemblyLoadContext obj)
