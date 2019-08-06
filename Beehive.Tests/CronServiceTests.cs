@@ -1,8 +1,12 @@
+using Beehive.Config;
 using Beehive.Model;
 using Beehive.Services;
+using Beehive.Utils;
 using FluentAssertions;
 using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
+using System.Threading;
 using Xunit;
 
 namespace Beehive.Tests
@@ -44,7 +48,7 @@ namespace Beehive.Tests
             yield return new object[] {
                 "0 7 * * *",
                 new DateTime(2019, 8, 4, 14, 11, 0, DateTimeKind.Utc),
-                TimeZoneInfo.FindSystemTimeZoneById("Europe/Copenhagen"),
+                TimeZoneService.GetTimeZoneInfo("Europe/Copenhagen"),
                 new DateTime(2019, 8, 5, 5, 0, 0, DateTimeKind.Utc)
             };
         }

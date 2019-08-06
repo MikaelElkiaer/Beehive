@@ -10,33 +10,31 @@ namespace Beehive.Services
     public class TimeZoneService
     {
         private readonly ILogger logger;
-        private readonly ProgramContext programContext;
 
-        public TimeZoneService(ILogger logger, ProgramContext programContext)
+        public TimeZoneService(ILogger logger)
         {
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            this.programContext = programContext;
         }
 
-        public TimeZoneInfo GetTimeZoneInfo(string tz)
+        public TimeZoneInfo GetTimeZoneInfoWithUtcFallback(string tz)
         {
-            TimeZoneInfo timeZoneInfo;
+            TimeZoneInfo timeZoneInfo = TimeZoneInfo.Utc;
             try
             {
-                string timeZoneId = tz;
-                if (programContext.OperationSystem == OSPlatform.Windows)
-                    timeZoneId = TimeZoneConverter.TZConvert.IanaToWindows(tz);
-
-                timeZoneInfo = TimeZoneInfo.FindSystemTimeZoneById(timeZoneId);
+                timeZoneInfo = GetTimeZoneInfo(tz ?? "UTC");
             }
             catch (Exception ex)
             {
-                logger.Error(ex, "Could not set timezone from id {TimeZoneId}", tz);
-                timeZoneInfo = TimeZoneInfo.Utc;
+                logger.Warning(ex, "Could not set timezone from id {TimeZoneId}", tz);
             }
 
-            logger.Verbose("Set time zone to {TimeZoneId}", timeZoneInfo.Id);
+            logger.Debug("Set time zone to {TimeZoneId}", timeZoneInfo.Id);
             return timeZoneInfo;
+        }
+
+        public static TimeZoneInfo GetTimeZoneInfo(string tz)
+        {
+            return TimeZoneConverter.TZConvert.GetTimeZoneInfo(tz);
         }
     }
 }

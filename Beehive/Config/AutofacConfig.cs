@@ -14,7 +14,6 @@ namespace Beehive.Config
         const string DOCKER_ENDPOINT_LINUX = "unix:///var/run/docker.sock";
         const string DOCKER_ENDPOINT_WINDOWS = "npipe://./pipe/docker_engine";
         private const string TZ = "TZ";
-        private const string TZ_DEFAULT = "UTC";
 
         public static ILifetimeScope CreateContainer()
         {
@@ -40,7 +39,7 @@ namespace Beehive.Config
             ).AsSelf().SingleInstance();
             cb.Register(c => new AppConfig(
                 runFrequency: TimeSpan.FromMinutes(1),
-                timeZoneInfo: c.Resolve<TimeZoneService>().GetTimeZoneInfo(Environment.GetEnvironmentVariable(TZ) ?? TZ_DEFAULT))
+                timeZoneInfo: c.Resolve<TimeZoneService>().GetTimeZoneInfoWithUtcFallback(Environment.GetEnvironmentVariable(TZ)))
             ).AsSelf().SingleInstance();
             cb.Register(c => new RunConfig(DateTime.UtcNow)).AsSelf().InstancePerLifetimeScope();
         }

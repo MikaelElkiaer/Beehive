@@ -26,17 +26,25 @@ namespace Beehive.Tests
 
         [Theory]
         [MemberData(nameof(GetTimeZoneInfo_Theory_Data))]
-        public void GetTimeZoneInfo_Theory(string tz, TimeSpan baseUtcOffset, bool supportsDaylightSavingTime)
+        public void GetTimeZoneInfoWithUtcFallback_Success_Theory(string tz, TimeSpan baseUtcOffset, bool supportsDaylightSavingTime)
         {
-            var timeZoneInfo = new TimeZoneService(fakeLogger, new ProgramContext
-            (
-                new CancellationTokenSource(),
-                OSUtils.GetOperationSystem()
-            )).GetTimeZoneInfo(tz);
+            var timeZoneInfo = new TimeZoneService(fakeLogger).GetTimeZoneInfoWithUtcFallback(tz);
 
             timeZoneInfo.Should().NotBeNull();
             timeZoneInfo.BaseUtcOffset.Should().Be(baseUtcOffset);
             timeZoneInfo.SupportsDaylightSavingTime.Should().Be(supportsDaylightSavingTime);
+        }
+
+        [Theory]
+        [InlineData("")]
+        [InlineData(null)]
+        [InlineData("nonsense")]
+        public void GetTimeZoneInfoWithUtcFallback_Fail_Theory(string tz)
+        {
+            var timeZoneInfo = new TimeZoneService(fakeLogger).GetTimeZoneInfoWithUtcFallback(tz);
+
+            timeZoneInfo.Should().NotBeNull();
+            timeZoneInfo.Id.Should().Be("UTC");
         }
 
         public static IEnumerable<object[]> GetTimeZoneInfo_Theory_Data()
