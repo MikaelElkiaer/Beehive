@@ -14,8 +14,8 @@ namespace Beehive
 
         static async Task<int> Main(string[] args)
         {
-            AssemblyLoadContext.Default.Unloading += Default_Unloading;
-            Console.CancelKeyPress += CancelHandler;
+            AppDomain.CurrentDomain.ProcessExit += CurrentDomain_ProcessExit;
+            Console.CancelKeyPress += Console_CancelKeyPress;
 
             try
             {
@@ -37,13 +37,13 @@ namespace Beehive
             return 0;
         }
 
-        private static void Default_Unloading(AssemblyLoadContext obj)
+        static void CurrentDomain_ProcessExit(object sender, EventArgs e)
         {
             container.Resolve<ILogger>().Information("Exiting...");
             container.Resolve<ProgramContext>().CancellationTokenSource.Cancel();
         }
 
-        private static void CancelHandler(object sender, ConsoleCancelEventArgs e)
+        static void Console_CancelKeyPress(object sender, ConsoleCancelEventArgs e)
         {
             e.Cancel = true;
             container.Resolve<ILogger>().Information("Cancelled...");
