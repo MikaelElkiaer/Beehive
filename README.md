@@ -24,8 +24,8 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
 	environment:
-	  - TZ=UTC
-	  - LOG_LEVEL=INFORMATION # (VERBOSE|DEBUG|INFORMATION|WARNING|ERROR|FATAL)
+      - TZ=UTC # A valid IANA (TZ database) time zone
+      - LOG_LEVEL=INFORMATION # (VERBOSE|DEBUG|INFORMATION|WARNING|ERROR|FATAL)
 ```
 
 ## Registering a task
