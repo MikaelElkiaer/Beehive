@@ -23,7 +23,7 @@ services:
     image: mikaelelkiaer/beehive
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-	environment:
+    environment:
       - TZ=UTC # A valid IANA (TZ database) time zone
       - LOG_LEVEL=INFORMATION # (VERBOSE|DEBUG|INFORMATION|WARNING|ERROR|FATAL)
 ```
