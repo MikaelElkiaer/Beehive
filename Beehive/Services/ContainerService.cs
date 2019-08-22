@@ -1,4 +1,5 @@
 ﻿using Beehive.Config;
+using Beehive.Model;
 using Beehive.Utils;
 using Cronos;
 using Docker.DotNet;
@@ -14,8 +15,9 @@ namespace Beehive.Services
 {
     public class ContainerService
     {
-        private const string BEEHIVE_CRON = "beehive.cron";
         private const string BEEHIVE_ENABLE = "beehive.enable";
+        private const string BEEHIVE_CRON = "beehive.cron";
+        private const string BEEHIVE_REPLACE_RUNNING = "beehive.replace-running";
         private const string TRUE = "true";
         private const string LABEL = "label";
 
@@ -24,7 +26,7 @@ namespace Beehive.Services
         private readonly DockerClient dockerClient;
         private readonly CronService cronService;
 
-        public ContainerService(ILogger logger, AppConfig appConfig, RunConfig runConfig, DockerClient dockerClient, CronService cronService)
+        public ContainerService(ILogger logger, RunConfig runConfig, DockerClient dockerClient, CronService cronService)
         {
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
             this.runConfig = runConfig ?? throw new ArgumentNullException(nameof(runConfig));
@@ -51,7 +53,7 @@ namespace Beehive.Services
                     {
                         logger.Verbose("Determining whether container should run {ImageName} [{ContainerId}]", c.Image, c.ID);
                         if (c.Labels.TryGetValue(BEEHIVE_CRON, out string cronText) && cronService.ShouldRun(cronText))
-                            await Run(dockerClient, c);
+                            await Run(dockerClient, c, c.Labels.TryGetValue(BEEHIVE_REPLACE_RUNNING, out string replaceRunningText) && bool.TryParse(replaceRunningText, out bool replaceRunning) ? replaceRunning : false);
                         else
                             logger.Verbose("Container not scheduled for this run {ImageName} [{ContainerId}]", c.Image, c.ID);
                     }
@@ -63,8 +65,17 @@ namespace Beehive.Services
             }
         }
 
-        private async Task Run(DockerClient client, ContainerListResponse c)
+        private async Task Run(DockerClient client, ContainerListResponse c, bool replaceRunning)
         {
+            if (!IsStopped(c.State))
+            {
+                logger.Warning("Container not in stopped state {ImageName} [{ContainerId}] - ReplaceRunning is set to {ReplaceRunning}", c.Image, c.ID, replaceRunning);
+                if (replaceRunning)
+                    await client.Containers.StopContainerAsync(c.ID, null);
+                else
+                    return;
+            }
+
             logger.Information("Running container {ImageName} [{ContainerId}]", c.Image, c.ID);
             try
             {
@@ -73,6 +84,19 @@ namespace Beehive.Services
             catch (Exception ex)
             {
                 logger.Error(ex, "Failed to run container {ImageName} [{ContainerId}]", c.Image, c.ID);
+            }
+        }
+
+        private bool IsStopped(string state)
+        {
+            switch (state)
+            {
+                case "created":
+                case "exited":
+                case "stopped":
+                    return true;
+                default:
+                    return false;
             }
         }
     }
