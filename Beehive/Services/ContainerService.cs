@@ -66,7 +66,14 @@ namespace Beehive.Services
         private async Task Run(DockerClient client, ContainerListResponse c)
         {
             logger.Information("Running container {ImageName} [{ContainerId}]", c.Image, c.ID);
-            await client.Containers.StartContainerAsync(c.ID, null);
+            try
+            {
+                await client.Containers.StartContainerAsync(c.ID, null);
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex, "Failed to run container {ImageName} [{ContainerId}]", c.Image, c.ID);
+            }
         }
     }
 }
