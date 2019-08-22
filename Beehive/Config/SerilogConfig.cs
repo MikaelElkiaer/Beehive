@@ -12,11 +12,7 @@ namespace Beehive.Config
         {
             return Log.Logger = new LoggerConfiguration()
                 .MinimumLevel.Is(GetLogLevel())
-                .Enrich.WithProcessId()
-                .Enrich.WithMachineName()
-                .Enrich.WithProperty("UserDomainName", Environment.UserDomainName)
-                .Enrich.WithProperty("UserName", Environment.UserName)
-                .WriteTo.ColoredConsole()
+                .WriteTo.Console(standardErrorFromLevel: LogEventLevel.Error)
                 .CreateLogger();
         }
 

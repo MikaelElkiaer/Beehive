@@ -34,7 +34,7 @@ namespace Beehive.Services
 
         public async Task Run()
         {
-            logger.Information("Run started at [{RunStartUtc}]", runConfig.StartUtc);
+            logger.Information("Run started at [{RunStartUtc:o}]", runConfig.StartUtc);
 
             using (logger.TimedExecution(LogEventLevel.Information, "Finished run"))
             {
