@@ -30,9 +30,11 @@ services:
 
 ## Registering a task
 A task is registered by attaching 2 labels to a container:
-* `beehive.enable=true` - task will only be run if set to `true`, any other value will disable
-* `beehive.cron` - defines the task schedule using [Cronos' extended cron format](https://github.com/HangfireIO/Cronos#cron-format)
-* `beehive.replace-running` - defaults to `false` - skipping already running tasks, if set to `true` - the already running container will be stopped and replaced by a fresh run
+* `beehive.enable=true` - task will only be run if set to `true`, any other value will leave it disabled.
+* `beehive.cron` - defines the task schedule using [Cronos' extended cron format](https://github.com/HangfireIO/Cronos#cron-format).
+
+### Additional options
+* `beehive.replace-running` - defaults to `false` - skipping already running tasks. If set to `true` - the already running container will be stopped and replaced by a fresh run.
 
 ### docker create
 * Use `docker create` to register a container with a configuration, but without running it:
