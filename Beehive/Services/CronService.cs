@@ -14,9 +14,9 @@ namespace Beehive.Services
 
         public CronService(ILogger logger, AppConfig appConfig, RunConfig runConfig)
         {
-            this.logger = logger;
-            this.appConfig = appConfig;
-            this.runConfig = runConfig;
+            this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            this.appConfig = appConfig ?? throw new ArgumentNullException(nameof(appConfig));
+            this.runConfig = runConfig ?? throw new ArgumentNullException(nameof(runConfig));
         }
 
         public bool ShouldRun(string cronText)
@@ -25,7 +25,6 @@ namespace Beehive.Services
             try
             {
                 nextOccurence = GetNextOccurence(cronText, runConfig.StartUtc, appConfig.TimeZoneInfo);
-
             }
             catch (CronParseException ex)
             {

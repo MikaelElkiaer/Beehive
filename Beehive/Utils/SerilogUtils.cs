@@ -1,10 +1,7 @@
 ﻿using Serilog;
 using Serilog.Events;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
 
 namespace Beehive.Utils
 {

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Threading.Tasks;
-using System.Runtime.Loader;
 using Serilog;
 using Beehive.Config;
 using Autofac;

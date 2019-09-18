@@ -8,18 +8,20 @@ namespace Beehive.Config
     {
         private static LogEventLevel LOG_LEVEL_DEFAULT = LogEventLevel.Information;
 
-        public static ILogger CreateLogger()
+        public static ILogger CreateLogger(string logLevel)
         {
             return Log.Logger = new LoggerConfiguration()
-                .MinimumLevel.Is(GetLogLevel())
+                .MinimumLevel.Is(GetLogLevel(logLevel))
                 .WriteTo.Console(standardErrorFromLevel: LogEventLevel.Error)
                 .CreateLogger();
         }
 
-        private static LogEventLevel GetLogLevel()
+        private static LogEventLevel GetLogLevel(string logLevel)
         {
-            return Enum.TryParse(typeof(LogEventLevel), Environment.GetEnvironmentVariable("LOG_LEVEL") ?? LOG_LEVEL_DEFAULT.ToString(), true, out object logLevel)
-                ? (LogEventLevel)logLevel : LOG_LEVEL_DEFAULT;
+            if (Enum.TryParse(logLevel, true, out LogEventLevel parsedLogLevel))
+                return parsedLogLevel;
+            
+            return LOG_LEVEL_DEFAULT;
         }
     }
 }

@@ -1,7 +1,5 @@
 ﻿using Beehive.Config;
-using Beehive.Model;
 using Beehive.Utils;
-using Cronos;
 using Docker.DotNet;
 using Docker.DotNet.Models;
 using Serilog;
@@ -40,11 +38,7 @@ namespace Beehive.Services
 
             using (logger.TimedExecution(LogEventLevel.Information, "Finished run"))
             {
-                IList<ContainerListResponse> containers = await dockerClient.Containers.ListContainersAsync(new ContainersListParameters
-                {
-                    All = true,
-                    Filters = new Dictionary<string, IDictionary<string, bool>> { { LABEL, new Dictionary<string, bool> { { $"{BEEHIVE_ENABLE}={TRUE}", true } } } }
-                });
+                IList<ContainerListResponse> containers = await GetBeehiveContainers();
 
                 if (containers.Any())
                 {
@@ -52,8 +46,8 @@ namespace Beehive.Services
                     foreach (var c in containers)
                     {
                         logger.Verbose("Determining whether container should run {ImageName} [{ContainerId}]", c.Image, c.ID);
-                        if (c.Labels.TryGetValue(BEEHIVE_CRON, out string cronText) && cronService.ShouldRun(cronText))
-                            await Run(dockerClient, c, c.Labels.TryGetValue(BEEHIVE_REPLACE_RUNNING, out string replaceRunningText) && bool.TryParse(replaceRunningText, out bool replaceRunning) ? replaceRunning : false);
+                        if (ShouldRun(c))
+                            await Run(c);
                         else
                             logger.Verbose("Container not scheduled for this run {ImageName} [{ContainerId}]", c.Image, c.ID);
                     }
@@ -65,13 +59,33 @@ namespace Beehive.Services
             }
         }
 
-        private async Task Run(DockerClient client, ContainerListResponse c, bool replaceRunning)
+        private async Task<IList<ContainerListResponse>> GetBeehiveContainers()
         {
+            return await dockerClient.Containers.ListContainersAsync(new ContainersListParameters
+            {
+                All = true,
+                Filters = new Dictionary<string, IDictionary<string, bool>> { { LABEL, new Dictionary<string, bool> { { $"{BEEHIVE_ENABLE}={TRUE}", true } } } }
+            });
+        }
+
+        private bool ShouldRun(ContainerListResponse c)
+        {
+            return c.Labels.TryGetValue(BEEHIVE_CRON, out string cronText) && cronService.ShouldRun(cronText);
+        }
+
+        private static bool DetermineReplaceRunning(ContainerListResponse c)
+        {
+            return c.Labels.TryGetValue(BEEHIVE_REPLACE_RUNNING, out string replaceRunningText) && bool.TryParse(replaceRunningText, out bool replaceRunning) ? replaceRunning : false;
+        }
+
+        private async Task Run(ContainerListResponse c)
+        {
+            var replaceRunning = DetermineReplaceRunning(c);
             if (!IsStopped(c.State))
             {
                 logger.Warning("Container not in stopped state {ImageName} [{ContainerId}] - ReplaceRunning is set to {ReplaceRunning}", c.Image, c.ID, replaceRunning);
                 if (replaceRunning)
-                    await client.Containers.StopContainerAsync(c.ID, null);
+                    await dockerClient.Containers.StopContainerAsync(c.ID, null);
                 else
                     return;
             }
@@ -79,7 +93,7 @@ namespace Beehive.Services
             logger.Information("Running container {ImageName} [{ContainerId}]", c.Image, c.ID);
             try
             {
-                await client.Containers.StartContainerAsync(c.ID, null);
+                await dockerClient.Containers.StartContainerAsync(c.ID, null);
             }
             catch (Exception ex)
             {

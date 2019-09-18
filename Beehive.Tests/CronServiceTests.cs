@@ -1,12 +1,8 @@
-using Beehive.Config;
 using Beehive.Model;
 using Beehive.Services;
-using Beehive.Utils;
 using FluentAssertions;
 using System;
 using System.Collections.Generic;
-using System.Runtime.InteropServices;
-using System.Threading;
 using Xunit;
 
 namespace Beehive.Tests
@@ -48,20 +44,20 @@ namespace Beehive.Tests
             yield return new object[] {
                 "0 7 * * *",
                 new DateTime(2019, 8, 4, 14, 11, 0, DateTimeKind.Utc),
-                TimeZoneService.GetTimeZoneInfo("Europe/Copenhagen"),
+                TimeZoneConverter.TZConvert.GetTimeZoneInfo("Europe/Copenhagen"),
                 new DateTime(2019, 8, 5, 5, 0, 0, DateTimeKind.Utc)
             };
         }
 
         [Theory]
-        [MemberData(nameof(ShouldRun_Theory_Data))]
-        public void ShouldRun_Theory(DateTime utcNow, DateTime? nextOccurenceUtc, TimeSpan threshold, bool expected)
+        [MemberData(nameof(IsWithinThreshold_Theory_Data))]
+        public void IsWithinThreshold_Theory(DateTime utcNow, DateTime? nextOccurenceUtc, TimeSpan threshold, bool expected)
         {
             CronService.IsWithinThreshold(utcNow, nextOccurenceUtc, threshold)
                 .Should().Be(expected);
         }
 
-        public static IEnumerable<object[]> ShouldRun_Theory_Data()
+        public static IEnumerable<object[]> IsWithinThreshold_Theory_Data()
         {
             yield return new object[] {
                 DateTime.UtcNow,
