@@ -1,4 +1,4 @@
-# Beehive [![Build Status](https://drone.mikelk.dk/api/badges/MikaelElkiaer/Beehive/status.svg)](https://drone.mikelk.dk/MikaelElkiaer/Beehive)
+# Beehive [![Build Status](https://drone.k8s.mikelk.dk/api/badges/MikaelElkiaer/Beehive/status.svg)](https://drone.k8s.mikelk.dk/MikaelElkiaer/Beehive)
 Beehive is a simple cron task scheduler meant to be connected to a Docker host.
 It was created for running in a Docker container while connected to its host's docker.sock.
 This way it can watch labels for registered containers and run them as per their cron schedule.
