@@ -7,12 +7,6 @@ steps:
   commands:
     - dotnet test
 
-- name: registry
-  image: plugins/docker
-  settings:
-    repo: registry.local.mikelk.dk/beehive
-    tags: latest
-
 - name: hub  
   image: plugins/docker
   settings:
