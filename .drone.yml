@@ -10,7 +10,7 @@ steps:
 - name: registry
   image: plugins/docker
   settings:
-    repo: registry.mikelk.dk/beehive
+    repo: registry.local.mikelk.dk/beehive
     tags: latest
 
 - name: hub  
