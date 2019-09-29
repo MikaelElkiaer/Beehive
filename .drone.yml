@@ -12,7 +12,11 @@ steps:
   settings:
     repo: mikaelelkiaer/beehive
     tags: latest
-    username:
-      from_secret: DOCKER_USERNAME
+    username: mikaelelkiaer
     password:
-      from_secret: DOCKER_PASSWORD
+      from_secret: password
+
+---
+kind: secret
+name: password
+data: /E/ro/ccFiSc87Wb72Jpwys2Ul9Prb//Vs3qxP07rCxrxWK+4WtlSlDhuAQTpaNsYCqw02hMfrJ63pE2lTAoVg==
