@@ -1,6 +1,6 @@
 ﻿using Serilog;
 using Serilog.Events;
-using Serilog.Formatting.Json;
+using Serilog.Formatting.Elasticsearch;
 using System;
 
 namespace Beehive.Config
@@ -13,7 +13,7 @@ namespace Beehive.Config
         {
             return Log.Logger = new LoggerConfiguration()
                 .MinimumLevel.Is(GetLogLevel(logLevel))
-                .WriteTo.Console(new JsonFormatter(), standardErrorFromLevel: LogEventLevel.Error)
+                .WriteTo.Console(new ElasticsearchJsonFormatter(), standardErrorFromLevel: LogEventLevel.Error)
                 .CreateLogger();
         }
 
